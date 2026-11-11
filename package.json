@@ -1,0 +1,13 @@
+{
+  "name": "the-crimson-sleep",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "THE CRIMSON SLEEP - a 2D survival horror built on a C++ core compiled to WebAssembly",
+  "scripts": {
+    "build": "./build.sh",
+    "test:core": "g++ -std=c++17 -O1 -Icpp/include cpp/src/*.cpp cpp/tests/tests.cpp -o build/tests && ./build/tests",
+    "test:web": "node tools/web_test.mjs",
+    "serve": "python3 -m http.server 3000 --bind 0.0.0.0"
+  }
+}

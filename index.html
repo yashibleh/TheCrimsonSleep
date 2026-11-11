@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>THE CRIMSON SLEEP — a 2D survival horror</title>
+<meta name="description" content="The Crimson Sleep — a 2D survival horror game. Wake up. Find your sister. Do not stay." />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="icon" href="assets/logo.png" />
+</head>
+<body>
+  <div id="stage">
+    <canvas id="game" width="480" height="270" aria-label="game view"></canvas>
+    <div id="grain-overlay"></div>
+    <div id="scanlines"></div>
+
+    <!-- HUD ------------------------------------------------------------- -->
+    <div id="hud">
+      <div class="hud-top">
+        <div id="objective" class="objective"></div>
+        <div id="room-title"></div>
+      </div>
+
+      <div id="toasts"></div>
+      <div id="subtitle"></div>
+      <div id="prompt"></div>
+
+      <div class="hud-bar">
+        <div class="vitals">
+          <div class="bar-row">
+            <span class="bar-label">VIT</span>
+            <div class="bar health"><div id="hp-fill" class="fill"></div></div>
+            <span id="hp-text" class="bar-num">100</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">BRTH</span>
+            <div class="bar stamina"><div id="stam-fill" class="fill"></div></div>
+            <span class="bar-num"></span>
+          </div>
+        </div>
+        <div class="gear">
+          <div class="gear-row">
+            <span id="weapon-name" class="weapon">CROWBAR</span>
+            <span id="ammo-text" class="ammo">—</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">TORCH</span>
+            <div class="bar battery"><div id="battery-fill" class="fill"></div></div>
+            <span class="bar-num"></span>
+          </div>
+        </div>
+      </div>
+      <div class="hud-keys">
+        <span><b>WASD</b> move</span><span><b>Shift</b> run</span><span><b>F</b> strike</span>
+        <span><b>E</b> interact</span><span><b>L</b> torch</span><span><b>R</b> reload</span>
+        <span><b>Q</b> bandage</span><span><b>I</b> satchel</span><span><b>J</b> journal</span><span><b>Esc</b> pause</span>
+      </div>
+    </div>
+
+    <!-- BOOT ------------------------------------------------------------ -->
+    <section id="boot" class="screen visible boot-screen">
+      <div class="boot-inner">
+        <img id="logo-img" src="assets/logo.png" alt="THE CRIMSON SLEEP" />
+        <div id="boot-prompt" class="boot-prompt">PRESS ANY KEY</div>
+      </div>
+      <div class="boot-foot">headphones recommended · contains flashing images and psychological horror</div>
+      <div class="boot-fog"></div>
+    </section>
+
+    <!-- MAIN MENU ------------------------------------------------------- -->
+    <section id="menu" class="screen menu-screen">
+      <div class="menu-vignette"></div>
+      <div class="menu-inner">
+        <div class="menu-title">THE CRIMSON SLEEP</div>
+        <div class="menu-sub">ashgrove sanatorium · the quiet hour</div>
+        <nav class="menu-list">
+          <button id="btn-new" class="menu-btn">New Game</button>
+          <button id="btn-continue" class="menu-btn">Continue</button>
+          <button id="btn-settings" class="menu-btn">Settings</button>
+          <button id="btn-credits" class="menu-btn">Credits</button>
+          <button id="btn-quit" class="menu-btn">Quit</button>
+        </nav>
+        <div id="continue-note" class="menu-note"></div>
+        <div class="menu-foot">A candle is a promise that you will come back.</div>
+      </div>
+    </section>
+
+    <!-- INVENTORY ------------------------------------------------------- -->
+    <section id="inventory" class="screen panel-screen">
+      <div class="panel wide">
+        <header class="panel-head">
+          <h2>Satchel</h2>
+          <button id="inventory-close-x" class="x" aria-label="close">×</button>
+        </header>
+        <div class="inv-body">
+          <div id="inv-grid" class="inv-grid"></div>
+          <aside class="inv-side">
+            <div id="inv-detail"></div>
+            <div class="inv-actions">
+              <button id="inv-use" class="btn">Use</button>
+              <button id="inv-close" class="btn ghost">Close</button>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- JOURNAL --------------------------------------------------------- -->
+    <section id="journal" class="screen panel-screen">
+      <div class="panel wide tall">
+        <header class="panel-head">
+          <h2>Journal</h2>
+          <button id="journal-close-x" class="x" aria-label="close">×</button>
+        </header>
+        <div class="journal-tabs">
+          <button class="journal-tab active" data-tab="journal">Clues</button>
+          <button class="journal-tab" data-tab="map">Map</button>
+          <button class="journal-tab" data-tab="bestiary">Those in the dark</button>
+        </div>
+        <div id="journal-clue-pane" class="journal-pane">
+          <div id="clue-list" class="clue-list"></div>
+          <div id="clue-body" class="clue-body"></div>
+        </div>
+        <div id="journal-map-pane" class="journal-pane">
+          <canvas id="map-canvas"></canvas>
+          <div class="map-note">Plans recovered from the west wing. Red is where you are.</div>
+        </div>
+        <div id="journal-bestiary-pane" class="journal-pane">
+          <div id="bestiary-list" class="bestiary-list"></div>
+        </div>
+        <footer class="panel-foot"><button id="journal-close" class="btn ghost">Close</button><span class="hint">J closes this</span></footer>
+      </div>
+    </section>
+
+    <!-- PAUSE ----------------------------------------------------------- -->
+    <section id="pause" class="screen reveal-screen">
+      <div class="pause-inner">
+        <h2>Paused</h2>
+        <p class="pause-line">The building waits. It is very patient.</p>
+        <div class="pause-buttons">
+          <button id="btn-resume" class="btn">Resume</button>
+          <button id="btn-pause-settings" class="btn ghost">Settings</button>
+          <button id="btn-pause-title" class="btn ghost">Save &amp; Quit to Menu</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -------------------------------------------------------- -->
+    <section id="settings" class="screen panel-screen">
+      <div class="panel narrow">
+        <header class="panel-head"><h2>Settings</h2></header>
+        <div class="settings-body">
+          <label class="setting">
+            <span>Master volume</span>
+            <input id="set-master" type="range" min="0" max="100" />
+          </label>
+          <label class="setting">
+            <span>Music &amp; ambience</span>
+            <input id="set-music" type="range" min="0" max="100" />
+          </label>
+          <label class="setting check">
+            <input id="set-grain" type="checkbox" />
+            <span>Film grain</span>
+          </label>
+          <label class="setting check">
+            <input id="set-shake" type="checkbox" />
+            <span>Camera shake</span>
+          </label>
+          <button id="btn-fullscreen" class="btn ghost">Toggle fullscreen</button>
+          <p class="settings-note">The dream is not paused while you are in this menu. That is not a bug.</p>
+        </div>
+        <footer class="panel-foot"><button id="btn-settings-back" class="btn">Back</button></footer>
+      </div>
+    </section>
+
+    <!-- KEYPAD ---------------------------------------------------------- -->
+    <section id="keypad" class="screen panel-screen">
+      <div class="panel keypad-panel">
+        <header class="panel-head"><h2>Mortuary Lock</h2></header>
+        <div id="code-display" class="code-display"></div>
+        <div id="code-pad" class="code-pad"></div>
+        <div class="panel-foot">
+          <button id="code-close" class="btn ghost">Step back</button>
+          <span class="hint">four numbers</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEATH ----------------------------------------------------------- -->
+    <section id="death" class="screen death-screen">
+      <div class="death-inner">
+        <h1>YOU DID NOT WAKE</h1>
+        <p class="death-line">The corridor folds you back into itself.</p>
+        <div id="death-stats" class="stats"></div>
+        <div class="death-buttons">
+          <button id="btn-restart" class="btn">Wake at the last candle</button>
+          <button id="btn-death-menu" class="btn ghost">Main menu</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ENDING ---------------------------------------------------------- -->
+    <section id="ending" class="screen ending-screen">
+      <div class="ending-inner">
+        <div class="ending-kicker">THE CRIMSON SLEEP</div>
+        <h1 id="ending-title"></h1>
+        <div id="ending-body" class="ending-body"></div>
+        <div id="ending-stats" class="stats"></div>
+        <div class="ending-buttons">
+          <button id="btn-ending-credits" class="btn">Credits</button>
+          <button id="btn-ending-menu" class="btn ghost">Main menu</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CREDITS --------------------------------------------------------- -->
+    <section id="credits" class="screen credits-screen">
+      <div id="credits-roll" class="credits-roll"></div>
+      <button id="btn-credits-back" class="btn credits-back">Back</button>
+    </section>
+
+    <!-- QUIT ------------------------------------------------------------ -->
+    <section id="quit" class="screen quit-screen">
+      <div class="quit-inner">
+        <h1>You have left the sleep.</h1>
+        <p>Close this tab when you are ready. It will still be here.</p>
+        <button id="btn-quit-back" class="btn">Return to the title</button>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
