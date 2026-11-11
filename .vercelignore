@@ -1,0 +1,8 @@
+# Skipped only in the Vercel upload, never in git.
+# The deployed site is just the browser payload: index.html, css/, js/, assets/.
+build/
+artifacts/
+cpp/
+docs/
+tools/
+.gitignore

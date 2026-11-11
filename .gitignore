@@ -1,0 +1,26 @@
+# Compiled output (rebuild with ./build.sh or the test commands in README.md)
+build/
+*.o
+*.a
+
+# Packaged release archive: attach it to a GitHub Release instead of committing it
+artifacts/*.zip
+
+# Node tooling caches (only used by the test tooling, never a project dependency)
+node_modules/
+npm-debug.log*
+
+# Vercel CLI working directory
+.vercel/
+
+# Local server logs and PID files
+*.log
+*.pid
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.idea/
+.vscode/

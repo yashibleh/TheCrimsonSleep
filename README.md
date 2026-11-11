@@ -16,13 +16,38 @@ is reimplemented in JavaScript.
 The game is a static site; it needs to be served over HTTP because it loads a `.wasm` module.
 
 ```bash
-python3 -m http.server 3000 --bind 0.0.0.0
+# macOS / Linux
+python3 -m http.server 3000
+# Windows (there is no `python3` command; use the py launcher)
+py -m http.server 3000
 # then open http://localhost:3000/
 ```
+
+Run it from inside the unzipped game folder (the one containing `index.html`). If `py` or `python`
+is "not found" or opens the Microsoft Store, Python is missing from `PATH` (re-run the installer and
+tick *Add python.exe to PATH*) or the name is being answered by the Microsoft Store alias stub
+(Settings → Apps → Advanced app settings → App execution aliases → turn off `python.exe` and
+`python3.exe`). Any other static server works too, for example `npx serve .`.
 
 Any static file server works (`npx serve`, `caddy file-server`, nginx, GitHub Pages). It has no
 build step at runtime, no backend, no cookies and no network access beyond its own files. Progress is
 kept in `localStorage` under the key `tcs_save_v1`.
+
+## Deploying to Vercel
+
+The repository is already configured for it. `vercel.json` pins the framework to *Other*, clears the
+install and build commands, and serves the repository root, so nothing is compiled in the cloud.
+Import the repository at [vercel.com/new](https://vercel.com/new) and accept the detected settings.
+
+Three things keep that working:
+
+- `assets/game.wasm` is committed. Vercel has no C++/Zig toolchain, so the compiled core has to be in
+  the repo; `buildCommand` is `null` so no rebuild is attempted.
+- The npm script used to be called `build`, which meant a project falling back to `package.json`
+  scripts would try to run `./build.sh` on Vercel and fail. It is now `npm run build:wasm`.
+- `.vercelignore` keeps the upload to the browser payload (`index.html`, `css/`, `js/`, `assets/`), so
+  the C++ sources, docs and screenshots stay on GitHub without shipping. Every path the page loads is
+  relative and lowercase, which matters because Vercel's filesystem is case-sensitive.
 
 ## Controls
 
